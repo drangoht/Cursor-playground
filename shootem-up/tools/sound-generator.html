@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sound Generator</title>
+</head>
+<body>
+    <h1>Sound Generator</h1>
+    <button onclick="generateAndDownloadSounds()">Generate and Download Sounds</button>
+
+    <script>
+        async function generateSound(ctx, type) {
+            const audioBuffer = await ctx.createBuffer(1, ctx.sampleRate * 1, ctx.sampleRate);
+            const channelData = audioBuffer.getChannelData(0);
+            
+            switch(type) {
+                case 'shoot':
+                    for(let i = 0; i < audioBuffer.length; i++) {
+                        const t = i / ctx.sampleRate;
+                        const freq = 880 - (440 * t * 10);
+                        channelData[i] = Math.sin(2 * Math.PI * freq * t) * 0.3 * Math.exp(-t * 10);
+                    }
+                    break;
+                case 'explosion':
+                    for(let i = 0; i < audioBuffer.length; i++) {
+                        channelData[i] = (Math.random() * 2 - 1) * Math.exp(-i / audioBuffer.length * 5);
+                    }
+                    break;
+                // Add other sound types...
+            }
+            
+            return audioBuffer;
+        }
+
+        async function generateAndDownloadSounds() {
+            const ctx = new AudioContext();
+            const sounds = ['shoot', 'explosion', 'powerup', 'hit', 'hit_small', 'hit_medium', 'splat', 'game_over'];
+            
+            for(const sound of sounds) {
+                const buffer = await generateSound(ctx, sound);
+                const wav = audioBufferToWav(buffer);
+                downloadBlob(wav, `${sound}.wav`);
+            }
+        }
+
+        function downloadBlob(blob, filename) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+        }
+
+        // Add audioBufferToWav function here (WAV file format conversion)
+    </script>
+</body>
+</html> 
