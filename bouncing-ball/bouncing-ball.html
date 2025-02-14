@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bouncing Ball Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+            background: white;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        // Get canvas and context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game constants
+        const width = 800;
+        const height = 600;
+
+        // Ball properties
+        const ballRadius = 20;
+        let ballX = width / 2;
+        let ballY = height / 2;
+        let ballSpeedX = 5;
+        let ballSpeedY = 5;
+        let ballTrail = [];
+
+        // Bar properties
+        const barWidth = 100;
+        const barHeight = 20;
+        let barX = width / 2 - barWidth / 2;
+        let barY = height - 40;
+        const barSpeed = 7;
+        let barGlow = 0;
+
+        // Brick properties
+        const BRICK_COLORS = [
+            '#FF5757', // Red
+            '#FFBD57', // Orange
+            '#FFFF57', // Yellow
+            '#57FF57', // Green
+            '#5757FF'  // Blue
+        ];
+        const BRICK_ROWS = 5;
+        const BRICK_COLS = 8;
+        const BRICK_WIDTH = width / BRICK_COLS;
+        const BRICK_HEIGHT = 30;
+        const BRICK_PADDING = 2;
+
+        // Create bricks
+        let bricks = [];
+        for (let row = 0; row < BRICK_ROWS; row++) {
+            for (let col = 0; col < BRICK_COLS; col++) {
+                bricks.push({
+                    x: col * BRICK_WIDTH + BRICK_PADDING,
+                    y: row * BRICK_HEIGHT + BRICK_PADDING + 50,
+                    width: BRICK_WIDTH - 2 * BRICK_PADDING,
+                    height: BRICK_HEIGHT - 2 * BRICK_PADDING,
+                    color: BRICK_COLORS[row]
+                });
+            }
+        }
+
+        // Particles system
+        let particles = [];
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = Math.random() * 3 + 2;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 2;
+                this.dx = Math.cos(angle) * speed;
+                this.dy = Math.sin(angle) * speed;
+                this.life = 255;
+            }
+
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.dy += 0.1;
+                this.life -= 10;
+                return this.life > 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.fillStyle = `${this.color}${Math.floor(this.life).toString(16).padStart(2, '0')}`;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Game state
+        let score = 0;
+        let shakeOffset = { x: 0, y: 0 };
+        let shakeIntensity = 0;
+
+        // Input handling
+        let leftPressed = false;
+        let rightPressed = false;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') leftPressed = true;
+            if (e.key === 'ArrowRight') rightPressed = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') leftPressed = false;
+            if (e.key === 'ArrowRight') rightPressed = false;
+        });
+
+        function addParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function applyScreenShake() {
+            if (shakeIntensity > 0) {
+                shakeOffset.x = (Math.random() - 0.5) * shakeIntensity * 2;
+                shakeOffset.y = (Math.random() - 0.5) * shakeIntensity * 2;
+                shakeIntensity *= 0.9;
+            }
+        }
+
+        function update() {
+            // Move bar
+            if (leftPressed && barX > 0) barX -= barSpeed;
+            if (rightPressed && barX < width - barWidth) barX += barSpeed;
+
+            // Update ball position
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Update ball trail
+            ballTrail.push({ x: ballX, y: ballY });
+            if (ballTrail.length > 10) ballTrail.shift();
+
+            // Ball collision with bricks
+            for (let i = bricks.length - 1; i >= 0; i--) {
+                const brick = bricks[i];
+                if (ballX > brick.x && ballX < brick.x + brick.width &&
+                    ballY > brick.y && ballY < brick.y + brick.height) {
+                    bricks.splice(i, 1);
+                    ballSpeedY *= -1;
+                    score += 1;
+                    addParticles(ballX, ballY, brick.color, 15);
+                    shakeIntensity = 4;
+                    break;
+                }
+            }
+
+            // Ball collision with walls
+            if (ballX <= ballRadius || ballX >= width - ballRadius) {
+                ballSpeedX *= -1;
+                addParticles(ballX, ballY, '#FF0000');
+                shakeIntensity = 3;
+            }
+            if (ballY <= ballRadius) {
+                ballSpeedY *= -1;
+                addParticles(ballX, ballY, '#FF0000');
+                shakeIntensity = 3;
+            }
+
+            // Ball collision with bar
+            if (ballY >= barY - ballRadius && ballX >= barX && ballX <= barX + barWidth) {
+                const relativeIntersect = (ballX - barX) / barWidth;
+                const angle = (relativeIntersect - 0.5) * Math.PI * 2/3;
+                const speed = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2);
+                ballSpeedX = speed * Math.sin(angle);
+                ballSpeedY = -speed * Math.cos(angle);
+                ballY = barY - ballRadius;
+                barGlow = 255;
+                addParticles(ballX, ballY, '#FFD700', 20);
+                shakeIntensity = 5;
+            }
+
+            // Ball falls below bar
+            if (ballY >= height - ballRadius) {
+                ballSpeedY *= -1;
+                addParticles(ballX, ballY, '#FF0000');
+                shakeIntensity = 3;
+            }
+
+            // Update particles
+            particles = particles.filter(p => p.update());
+            applyScreenShake();
+            barGlow = Math.max(0, barGlow - 10);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw bricks
+            bricks.forEach(brick => {
+                ctx.fillStyle = brick.color;
+                ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
+            });
+
+            // Draw ball trail
+            ballTrail.forEach((pos, i) => {
+                const alpha = (i / ballTrail.length) * 0.6;
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
+                ctx.arc(pos.x + shakeOffset.x, pos.y + shakeOffset.y, 
+                       ballRadius * (i / ballTrail.length), 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw particles
+            particles.forEach(p => p.draw());
+
+            // Draw bar with glow
+            if (barGlow > 0) {
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = barGlow / 5;
+            }
+            ctx.fillStyle = '#0000FF';
+            ctx.fillRect(barX + shakeOffset.x, barY + shakeOffset.y, barWidth, barHeight);
+            ctx.shadowBlur = 0;
+
+            // Draw ball
+            ctx.beginPath();
+            ctx.fillStyle = '#FF0000';
+            ctx.arc(ballX + shakeOffset.x, ballY + shakeOffset.y, ballRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw score
+            ctx.fillStyle = '#000000';
+            ctx.font = '36px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText(`Score: ${score}`, width - 10, 40);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start the game
+        gameLoop();
+    </script>
+</body>
+</html>
