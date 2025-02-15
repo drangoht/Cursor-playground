@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lemon Survivor</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Main menu -->
+        <div id="menu-screen" class="overlay">
+            <div class="title-container">
+                <div class="pixel-art-logo"></div>
+                <h1>Lemon Survivor</h1>
+            </div>
+            <button id="start-button" class="pixel-button">Start Game</button>
+            <button id="settings-button">Settings</button>
+            <button id="highscores-button">High Scores</button>
+        </div>
+
+        <!-- Game canvas -->
+        <div id="gameCanvas-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <div id="ui-overlay">
+            <div id="xp-bar-container">
+                <div id="xp-bar"></div>
+                <span id="level">Level: 1</span>
+            </div>
+        </div>
+        <div id="level-up-menu" class="overlay hidden">
+            <h2>Level Up!</h2>
+            <div id="upgrade-options" class="upgrade-options">
+                <!-- Upgrade options will be added here dynamically -->
+            </div>
+        </div>
+        <div id="game-over-screen" class="overlay hidden">
+            <h1>Game Over!</h1>
+            <p>You survived <span id="wave-count">0</span> waves</p>
+            <p>Score: <span id="final-score">0</span></p>
+            <button id="restart-button">Play Again</button>
+        </div>
+        <div id="settings-menu" class="overlay hidden">
+            <h2>Settings</h2>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <label>Sound Effects</label>
+                    <input type="range" id="sfx-volume" min="0" max="100" value="70">
+                </div>
+                <div class="setting-item">
+                    <label>Show Damage Numbers</label>
+                    <input type="checkbox" id="show-damage" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Show Target Indicator</label>
+                    <input type="checkbox" id="show-target" checked>
+                </div>
+                <div class="setting-item">
+                    <label>Screen Shake</label>
+                    <input type="checkbox" id="screen-shake" checked>
+                </div>
+            </div>
+            <button id="settings-back">Back to Menu</button>
+        </div>
+        <div id="highscores-menu" class="overlay hidden">
+            <h2>High Scores</h2>
+            <div id="highscores-list"></div>
+            <button id="highscores-back">Back to Menu</button>
+        </div>
+        <div id="pause-menu" class="overlay hidden">
+            <h2>Paused</h2>
+            <div class="menu-buttons">
+                <button id="resume-button" class="pixel-button">Resume</button>
+                <button id="pause-restart-button" class="pixel-button">Restart</button>
+                <button id="quit-to-menu" class="pixel-button">Quit to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core game scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/assets.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/highscores.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/projectile.js"></script>
+    <script src="js/powerup.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/wave-manager.js"></script>
+    <script src="js/boss.js"></script>
+    <script src="js/damage-number.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html> 

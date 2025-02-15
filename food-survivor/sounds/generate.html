@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Game Sounds</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .instructions {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sound Generator</h1>
+    <div class="instructions">
+        <p>Click the buttons below to generate and download game sounds. After generating, move the sound files to the /sounds directory in your game folder.</p>
+        <p>Required files:</p>
+        <ul>
+            <li>hit.wav - Sound for when projectiles hit enemies</li>
+            <li>shoot.wav - Sound for when the player shoots</li>
+            <li>levelup.wav - Sound for when the player levels up</li>
+        </ul>
+    </div>
+    <button onclick="generateAndDownload('hit')">Generate Hit Sound</button>
+    <button onclick="generateAndDownload('shoot')">Generate Shoot Sound</button>
+    <button onclick="generateAndDownload('levelup')">Generate Level Up Sound</button>
+    <script src="generate-sounds.js"></script>
+</body>
+</html> 
